@@ -21,46 +21,38 @@ RSpec.describe Coupon, type: :model do
   end
 
   describe 'custom validations' do
-    before(:each) do
-      Merchant.destroy_all
-    end
+    let(:merchant) { create(:merchant) }
     
     it 'allows up to 5 active coupons per merchant' do
-      merchant = Merchant.create!(name: 'Test Merchant')
-      
-      Coupon.create!(name: 'Coupon 1', code: 'ABC', discount_type: 'dollar_off', discount_value: 10, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 2', code: 'DEF', discount_type: 'percent_off', discount_value: 40, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 3', code: 'GHI', discount_type: 'percent_off', discount_value: 60, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 4', code: 'JKL', discount_type: 'dollar_off', discount_value: 5, status: 'active', merchant_id: merchant.id)
-      coupon5 = Coupon.create(name: 'Coupon 5', code: '123', discount_type: 'percent_off', discount_value: 100, status: 'active', merchant_id: merchant.id)
+      create(:coupon, name: 'Coupon 1', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 2', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 3', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 4', status: "active", merchant: merchant)
+      coupon5 = create(:coupon, name: 'Coupon 5', status: "active", merchant: merchant)
 
       expect(coupon5).to be_valid
     end
   
 
     it 'does not allow a merchant to have more than 5 active coupons' do
-      merchant = Merchant.create!(name: 'Test Merchant')
-
-      Coupon.create!(name: 'Coupon 1', code: 'MNO', discount_type: 'dollar_off', discount_value: 10, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 2', code: 'PQR', discount_type: 'percent_off', discount_value: 40, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 3', code: 'STU', discount_type: 'percent_off', discount_value: 60, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 4', code: 'VWX', discount_type: 'dollar_off', discount_value: 5, status: 'active', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 5', code: 'YZA', discount_type: 'percent_off', discount_value: 100, status: 'active', merchant_id: merchant.id)
-      coupon6 = Coupon.create(name: 'Coupon 6', code: '456', discount_type: 'percent_off', discount_value: 50, status: 'active', merchant_id: merchant.id)
+      create(:coupon, name: 'Coupon 1', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 2', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 3', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 4', status: "active", merchant: merchant)
+      create(:coupon, name: 'Coupon 5', status: "active", merchant: merchant)
+      coupon6 = build(:coupon, name: 'Coupon 6', status: "active", merchant: merchant)
 
       expect(coupon6).not_to be_valid
       expect(coupon6.errors[:status]).to include('cannot be set to active. Merchant already has 5 active coupons.')
     end
 
     it 'allows as many inactive coupons as wanted' do
-      merchant = Merchant.create!(name: 'Test Merchant')
-
-      Coupon.create!(name: 'Coupon 1', code: 'BCD', discount_type: 'dollar_off', discount_value: 10, status: 'inactive', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 2', code: 'EFG', discount_type: 'percent_off', discount_value: 40, status: 'inactive', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 3', code: 'HIJ', discount_type: 'percent_off', discount_value: 60, status: 'inactive', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 4', code: 'KLM', discount_type: 'dollar_off', discount_value: 5, status: 'inactive', merchant_id: merchant.id)
-      Coupon.create!(name: 'Coupon 5', code: 'NOP', discount_type: 'percent_off', discount_value: 100, status: 'inactive', merchant_id: merchant.id)
-      coupon6 = Coupon.create(name: 'Coupon 6', code: '789', discount_type: 'percent_off', discount_value: 50, status: 'inactive', merchant_id: merchant.id)
+      create(:coupon, name: 'Coupon 1', merchant: merchant)
+      create(:coupon, name: 'Coupon 2', merchant: merchant)
+      create(:coupon, name: 'Coupon 3', merchant: merchant)
+      create(:coupon, name: 'Coupon 4', merchant: merchant)
+      create(:coupon, name: 'Coupon 5', merchant: merchant)
+      coupon6 = build(:coupon, name: 'Coupon 5', merchant: merchant)
 
       expect(coupon6).to be_valid
     end
