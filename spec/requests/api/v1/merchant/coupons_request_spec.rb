@@ -3,9 +3,9 @@ require "rails_helper"
 RSpec.describe "Merchant coupons endpoints" do
   it "should return all coupons for a given merchant" do
     merchant = create(:merchant)
-    coupon1 = create(:coupon, status: "active", merchant_id: merchant.id)
-    coupon2 = create(:coupon, merchant_id: merchant.id)
-    coupon3 = create(:coupon, merchant_id: merchant.id)
+    coupon1 = create(:coupon, status: "active", merchant: merchant)
+    coupon2 = create(:coupon, merchant: merchant)
+    coupon3 = create(:coupon, merchant: merchant)
 
     get "/api/v1/merchants/#{merchant.id}/coupons"
     
@@ -43,5 +43,89 @@ RSpec.describe "Merchant coupons endpoints" do
     expect(response).to be_successful
     expect(response_data[:data][:id].to_i).to eq(coupon.id)
     expect(response_data[:meta][:use_count]).to eq(3)
+  end
+
+  it "creates a new coupon for a merchant" do
+    merchant = create(:merchant)
+
+    coupon_params = {
+      coupon: {
+        name: "20 Percent Off",
+        code: "20POFF",
+        discount_type: "percent_off",
+        discount_value: 20,
+        status: "active"
+      }
+    }
+
+    headers = { "CONTENT_TYPE" => "application/json" }
+
+    post "/api/v1/merchants/#{merchant.id}/coupons", headers: headers, params: JSON.generate(coupon_params)
+
+    expect(response).to be_successful
+    expect(response.status).to eq(201)
+
+    created_coupon = Coupon.last
+
+    expect(created_coupon.name).to eq("20 Percent Off")
+    expect(created_coupon.code).to eq("20POFF")
+    expect(created_coupon.discount_type).to eq("percent_off")
+    expect(created_coupon.discount_value).to eq(20)
+    expect(created_coupon.status).to eq("active")
+    expect(created_coupon.merchant_id).to eq(merchant.id)
+  end
+
+  it "activates a coupon" do
+    merchant = create(:merchant)
+    coupon = create(:coupon, merchant: merchant, status: 'inactive')
+
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/activate"
+
+    expect(response).to be_successful
+    response_data = JSON.parse(response.body, symbolize_names: true)
+
+    activated_coupon = response_data[:data]
+
+    expect(activated_coupon[:id].to_i).to eq(coupon.id)
+    expect(activated_coupon[:attributes][:status]).to eq('active')
+  end
+
+  it "returns an error if the coupon is already active" do
+    merchant = create(:merchant)
+    coupon = create(:coupon, merchant: merchant, status: 'active')
+
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/activate"
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    error_message = JSON.parse(response.body, symbolize_names: true)
+
+    expect(error_message[:error]).to eq("Coupon is already active")
+  end
+
+  it "deactivates a coupon" do
+    merchant = create(:merchant)
+    coupon = create(:coupon, merchant: merchant, status: 'active')
+
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/deactivate"
+
+    expect(response).to be_successful
+    response_data = JSON.parse(response.body, symbolize_names: true)
+
+    deactivated_coupon = response_data[:data]
+
+    expect(deactivated_coupon[:id].to_i).to eq(coupon.id)
+    expect(deactivated_coupon[:attributes][:status]).to eq('inactive')
+  end
+
+  it "returns an error if the coupon is already inactive" do
+    merchant = create(:merchant)
+    coupon = create(:coupon, merchant: merchant, status: 'inactive')
+
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/deactivate"
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    error_message = JSON.parse(response.body, symbolize_names: true)
+
+    expect(error_message[:error]).to eq("Coupon is already inactive")
   end
 end
