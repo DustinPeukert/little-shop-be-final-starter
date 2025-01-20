@@ -18,4 +18,8 @@ class Coupon < ApplicationRecord
       errors.add(:status, "cannot be set to active. Merchant already has 5 active coupons.")
     end
   end
+
+  def self.filter_by_status(status)
+    where(status: status)
+  end
 end
