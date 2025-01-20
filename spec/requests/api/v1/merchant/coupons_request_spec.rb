@@ -30,4 +30,18 @@ RSpec.describe "Merchant coupons endpoints" do
     expect(coupons[:data][2][:attributes][:discount_value]).to eq(coupon3.discount_value)
     expect(coupons[:data][2][:attributes][:status]).to eq(coupon3.status)
   end
+
+  it "should return a specific coupon and the usage count" do
+    merchant = create(:merchant)
+    coupon = create(:coupon, merchant: merchant)
+    create_list(:invoice, 3, coupon: coupon)
+  
+    get "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}"
+  
+    response_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to be_successful
+    expect(response_data[:data][:id].to_i).to eq(coupon.id)
+    expect(response_data[:meta][:use_count]).to eq(3)
+  end
 end
