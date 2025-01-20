@@ -57,4 +57,32 @@ RSpec.describe Coupon, type: :model do
       expect(coupon6).to be_valid
     end
   end
+
+  describe 'filter_by_status' do
+    it 'returns active coupons' do
+      merchant = create(:merchant)
+      create(:coupon, merchant: merchant, status: "active")
+      create(:coupon, merchant: merchant, status: "active")
+      create(:coupon, merchant: merchant, status: "inactive")
+
+      active_coupons = Coupon.filter_by_status("active")
+
+      expect(active_coupons.count).to eq(2)
+      expect(active_coupons.first.status).to eq("active")
+      expect(active_coupons.last.status).to eq("active")
+    end
+
+    it 'returns inactive coupons' do
+      merchant = create(:merchant)
+      create(:coupon, merchant: merchant, status: "active")
+      create(:coupon, merchant: merchant, status: "inactive")
+      create(:coupon, merchant: merchant, status: "inactive")
+
+      inactive_coupons = Coupon.filter_by_status("inactive")
+
+      expect(inactive_coupons.count).to eq(2)
+      expect(inactive_coupons.first.status).to eq("inactive")
+      expect(inactive_coupons.last.status).to eq("inactive")
+    end
+  end
 end
