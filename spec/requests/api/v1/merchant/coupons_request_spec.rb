@@ -44,4 +44,34 @@ RSpec.describe "Merchant coupons endpoints" do
     expect(response_data[:data][:id].to_i).to eq(coupon.id)
     expect(response_data[:meta][:use_count]).to eq(3)
   end
+
+  it "creates a new coupon for a merchant" do
+    merchant = create(:merchant)
+
+    coupon_params = {
+      coupon: {
+        name: "20 Percent Off",
+        code: "20POFF",
+        discount_type: "percent_off",
+        discount_value: 20,
+        status: "active"
+      }
+    }
+
+    headers = { "CONTENT_TYPE" => "application/json" }
+
+    post "/api/v1/merchants/#{merchant.id}/coupons", headers: headers, params: JSON.generate(coupon_params)
+
+    expect(response).to be_successful
+    expect(response.status).to eq(201)
+
+    created_coupon = Coupon.last
+
+    expect(created_coupon.name).to eq("20 Percent Off")
+    expect(created_coupon.code).to eq("20POFF")
+    expect(created_coupon.discount_type).to eq("percent_off")
+    expect(created_coupon.discount_value).to eq(20)
+    expect(created_coupon.status).to eq("active")
+    expect(created_coupon.merchant_id).to eq(merchant.id)
+  end
 end
