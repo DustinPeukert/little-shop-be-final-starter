@@ -31,6 +31,38 @@ RSpec.describe "Merchant coupons endpoints" do
     expect(coupons[:data][2][:attributes][:status]).to eq(coupon3.status)
   end
 
+  it "returns only active coupons when filtered by status=active" do
+    merchant = create(:merchant)
+    create(:coupon, merchant: merchant, status: "active")
+    create(:coupon, merchant: merchant, status: "active")
+    create(:coupon, merchant: merchant, status: "inactive")
+
+    get "/api/v1/merchants/#{merchant.id}/coupons?status=active"
+
+    coupons = JSON.parse(response.body, symbolize_names: true)
+    expect(response).to be_successful
+
+    expect(coupons[:data].size).to eq(2)
+    expect(coupons[:data][0][:attributes][:status]).to eq("active")
+    expect(coupons[:data][1][:attributes][:status]).to eq("active")
+  end
+
+  it "returns only inactive coupons when filtered by status=inactive" do
+    merchant = create(:merchant)
+    create(:coupon, merchant: merchant, status: "active")
+    create(:coupon, merchant: merchant, status: "inactive")
+    create(:coupon, merchant: merchant, status: "inactive")
+
+    get "/api/v1/merchants/#{merchant.id}/coupons?status=inactive"
+
+    coupons = JSON.parse(response.body, symbolize_names: true)
+    expect(response).to be_successful
+
+    expect(coupons[:data].size).to eq(2)
+    expect(coupons[:data][0][:attributes][:status]).to eq("inactive")
+    expect(coupons[:data][1][:attributes][:status]).to eq("inactive")
+  end
+
   it "should return a specific coupon and the usage count" do
     merchant = create(:merchant)
     coupon = create(:coupon, merchant: merchant)
