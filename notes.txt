@@ -1,0 +1,10 @@
+Merchant1 id:1 has 3 coupons, 2 active, 1 inactive, and Invoices ids: 29/137
+Merchant2 id:2 has 5 coupons, 4 active, 1 inactive, and Invoices ids: 45/77/121/259
+
+Invoice1 id:29 has coupon id:1
+Invoice2 id:137 has coupon id:1
+
+Invoice3 id:45 has coupon id:5
+Invoice4 id:77 has coupon id:5
+Invoice5 id:121 has coupon id:7
+Invoice6 id:259 has coupon id:5
