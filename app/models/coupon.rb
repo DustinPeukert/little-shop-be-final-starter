@@ -11,6 +11,18 @@ class Coupon < ApplicationRecord
 
   validate :merchant_active_coupon_limit, if: -> { status = 'active' }
 
+  def activate
+    return false if status == 'active'
+
+    update(status: 'active')
+  end
+
+  def deactivate
+    return false if status == 'inactive'
+
+    update(status: 'inactive')
+  end
+
   private
 
   def merchant_active_coupon_limit

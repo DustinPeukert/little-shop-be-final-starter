@@ -31,23 +31,23 @@ class Api::V1::Merchants::CouponsController < ApplicationController
     end
   end
 
-  def activate
+  def update
     coupon = Coupon.find(params[:coupon_id])
-    if coupon.status == 'active'
-      render json: { error: "Coupon is already active" }, status: :unprocessable_entity
-    else
-      coupon.update(status: 'active')
-      render json: CouponSerializer.new(coupon)
-    end
-  end
 
-  def deactivate
-    coupon = Coupon.find(params[:coupon_id])
-    if coupon.status == 'inactive'
-      render json: { error: "Coupon is already inactive" }, status: :unprocessable_entity
+    if params[:status] == 'active'
+      if coupon.activate
+        render json: CouponSerializer.new(coupon)
+      else
+        render json: { error: "Cannot activate coupon. Already active." }, status: :unprocessable_entity
+      end
+    elsif params[:status] == 'inactive'
+      if coupon.deactivate
+        render json: CouponSerializer.new(coupon)
+      else
+        render json: { error: "Cannot deactivate coupon. Already inactive." }, status: :unprocessable_entity
+      end
     else
-      coupon.update(status: 'inactive')
-      render json: CouponSerializer.new(coupon)
+      render json: { error: "Invalid status" }, status: :unprocessable_entity
     end
   end
 
