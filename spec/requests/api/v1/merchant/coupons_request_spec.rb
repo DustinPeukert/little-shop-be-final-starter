@@ -110,54 +110,54 @@ RSpec.describe "Merchant coupons endpoints" do
   it "activates a coupon" do
     merchant = create(:merchant)
     coupon = create(:coupon, merchant: merchant, status: 'inactive')
-
-    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/activate"
-
+  
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/update_status", params: { status: 'active' }
+  
     expect(response).to be_successful
     response_data = JSON.parse(response.body, symbolize_names: true)
-
+  
     activated_coupon = response_data[:data]
-
+  
     expect(activated_coupon[:id].to_i).to eq(coupon.id)
     expect(activated_coupon[:attributes][:status]).to eq('active')
   end
-
+  
   it "returns an error if the coupon is already active" do
     merchant = create(:merchant)
     coupon = create(:coupon, merchant: merchant, status: 'active')
-
-    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/activate"
-
+  
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/update_status", params: { status: 'active' }
+  
     expect(response).to have_http_status(:unprocessable_entity)
     error_message = JSON.parse(response.body, symbolize_names: true)
-
-    expect(error_message[:error]).to eq("Coupon is already active")
+  
+    expect(error_message[:error]).to eq("Cannot activate coupon. Already active.")
   end
-
+  
   it "deactivates a coupon" do
     merchant = create(:merchant)
     coupon = create(:coupon, merchant: merchant, status: 'active')
-
-    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/deactivate"
-
+  
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/update_status", params: { status: 'inactive' }
+  
     expect(response).to be_successful
     response_data = JSON.parse(response.body, symbolize_names: true)
-
+  
     deactivated_coupon = response_data[:data]
-
+  
     expect(deactivated_coupon[:id].to_i).to eq(coupon.id)
     expect(deactivated_coupon[:attributes][:status]).to eq('inactive')
   end
-
+  
   it "returns an error if the coupon is already inactive" do
     merchant = create(:merchant)
     coupon = create(:coupon, merchant: merchant, status: 'inactive')
-
-    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/deactivate"
-
+  
+    patch "/api/v1/merchants/#{merchant.id}/coupons/#{coupon.id}/update_status", params: { status: 'inactive' }
+  
     expect(response).to have_http_status(:unprocessable_entity)
     error_message = JSON.parse(response.body, symbolize_names: true)
-
-    expect(error_message[:error]).to eq("Coupon is already inactive")
+  
+    expect(error_message[:error]).to eq("Cannot deactivate coupon. Already inactive.")
   end
 end
