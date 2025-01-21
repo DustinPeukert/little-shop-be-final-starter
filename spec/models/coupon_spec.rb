@@ -58,6 +58,38 @@ RSpec.describe Coupon, type: :model do
     end
   end
 
+  describe 'activate' do
+    let(:merchant) { create(:merchant) }
+    let(:coupon) { create(:coupon, merchant: merchant, status: 'inactive') }
+  
+    it "activates an inactive coupon" do
+      expect(coupon.activate).to be true
+      expect(coupon.status).to eq('active')
+    end
+  
+    it "does not activate an already active coupon" do
+      active_coupon = create(:coupon, merchant: merchant, status: 'active')
+      expect(active_coupon.activate).to be false
+      expect(active_coupon.status).to eq('active')
+    end
+  end
+
+  describe 'deactivate' do
+    let(:merchant) { create(:merchant) }
+    let(:active_coupon) { create(:coupon, merchant: merchant, status: 'active') }
+  
+    it "deactivates an active coupon" do
+      expect(active_coupon.deactivate).to be true
+      expect(active_coupon.status).to eq('inactive')
+    end
+  
+    it "does not deactivate an already inactive coupon" do
+      inactive_coupon = create(:coupon, merchant: merchant, status: 'inactive')
+      expect(inactive_coupon.deactivate).to be false
+      expect(inactive_coupon.status).to eq('inactive')
+    end
+  end
+
   describe 'filter_by_status' do
     it 'returns active coupons' do
       merchant = create(:merchant)

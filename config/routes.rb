@@ -25,8 +25,7 @@ Rails.application.routes.draw do
         resources :customers, only: :index, controller: "merchants/customers"
         resources :invoices, only: :index, controller: "merchants/invoices"
         resources :coupons, except: [:new, :edit], controller: "merchants/coupons"
-        patch '/coupons/:coupon_id/activate', to: 'merchants/coupons#activate'
-        patch '/coupons/:coupon_id/deactivate', to: 'merchants/coupons#deactivate'
+        patch '/coupons/:coupon_id/update_status', to: 'merchants/coupons#update'
       end
     end
   end
